@@ -275,6 +275,7 @@ static void sigchld(int unused);
 static void spawn(const Arg *arg);
 static void startdrag(struct wl_listener *listener, void *data);
 static void tag(const Arg *arg);
+static void tagshift(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void tile(Monitor *m);
 static void togglefloating(const Arg *arg);
@@ -288,6 +289,7 @@ static void updatemons(struct wl_listener *listener, void *data);
 static void updatetitle(struct wl_listener *listener, void *data);
 static void urgent(struct wl_listener *listener, void *data);
 static void view(const Arg *arg);
+static void viewshift(const Arg *arg);
 static void virtualkeyboard(struct wl_listener *listener, void *data);
 static Monitor *xytomon(double x, double y);
 static struct wlr_scene_node *xytonode(double x, double y, struct wlr_surface **psurface,
@@ -2135,6 +2137,22 @@ tag(const Arg *arg)
 }
 
 void
+tagshift(const Arg *arg)
+{
+	Arg shifted;
+
+	if (arg->i > 0) 
+		shifted.ui = (selmon->tagset[selmon->seltags] << arg->i) 
+			| (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
+	else
+		shifted.ui = (selmon->tagset[selmon->seltags] >> - arg->i)
+			| (selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i));
+
+	tag(&shifted);
+	view(&shifted);
+}
+
+void
 tagmon(const Arg *arg)
 {
 	Client *sel = selclient();
@@ -2336,6 +2354,20 @@ view(const Arg *arg)
 	focusclient(focustop(selmon), 1);
 	arrange(selmon);
 	printstatus();
+}
+
+void
+viewshift(const Arg *arg)
+{
+	Arg shifted;
+
+	if (arg->i > 0) 
+		shifted.ui = (selmon->tagset[selmon->seltags] << arg->i) 
+			| (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
+	else
+		shifted.ui = (selmon->tagset[selmon->seltags] >> - arg->i)
+			| (selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i));
+	view(&shifted);
 }
 
 void
