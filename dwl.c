@@ -986,6 +986,9 @@ createpointer(struct wlr_input_device *device)
 
 		if (libinput_device_config_scroll_has_natural_scroll(libinput_device))
 			libinput_device_config_scroll_set_natural_scroll_enabled(libinput_device, natural_scrolling);
+		
+		if (accel_profile)
+			libinput_device_config_accel_set_profile(libinput_device, LIBINPUT_CONFIG_ACCEL_PROFILE_FLAT);
 	}
 
 	/* We don't do anything special with pointers. All of our pointer handling
@@ -1728,6 +1731,8 @@ void
 run(char *startup_cmd)
 {
 	pid_t startup_pid = -1;
+	int piperw[2];
+
 
 	/* Add a Unix socket to the Wayland display. */
 	const char *socket = wl_display_add_socket_auto(dpy);
@@ -1736,23 +1741,22 @@ run(char *startup_cmd)
 	setenv("WAYLAND_DISPLAY", socket, 1);
 
 	/* Now that the socket exists, run the startup command */
-	if (startup_cmd) {
-		int piperw[2];
-		if (pipe(piperw) < 0)
-			die("startup: pipe:");
-		if ((startup_pid = fork()) < 0)
-			die("startup: fork:");
-		if (startup_pid == 0) {
-			dup2(piperw[0], STDIN_FILENO);
-			close(piperw[0]);
-			close(piperw[1]);
-			execl("/bin/sh", "/bin/sh", "-c", startup_cmd, NULL);
-			die("startup: execl:");
-		}
-		dup2(piperw[1], STDOUT_FILENO);
-		close(piperw[1]);
+        if (!startup_cmd)
+            return;
+	if (pipe(piperw) < 0)
+		die("startup: pipe:");
+	if ((startup_pid = fork()) < 0)
+		die("startup: fork:");
+	if (startup_pid == 0) {
+		dup2(piperw[0], STDIN_FILENO);
 		close(piperw[0]);
+		close(piperw[1]);
+		execl("/bin/sh", "/bin/sh", "-c", startup_cmd, NULL);
+		die("startup: execl:");
 	}
+	dup2(piperw[1], STDOUT_FILENO);
+	close(piperw[1]);
+	close(piperw[0]);
 	/* If nobody is reading the status output, don't terminate */
 	signal(SIGPIPE, SIG_IGN);
 	printstatus();
@@ -2564,7 +2568,9 @@ main(int argc, char *argv[])
 	if (!getenv("XDG_RUNTIME_DIR"))
 		die("XDG_RUNTIME_DIR must be set");
 	setup();
-	run(startup_cmd);
+	/* Run nwg-panel */
+	run("nwg-dwl-interface");
+    run(startup_cmd);
 	cleanup();
 	return EXIT_SUCCESS;
 

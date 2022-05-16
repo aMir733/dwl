@@ -5,6 +5,7 @@ static const int lockfullscreen     = 1;  /* 1 will force focus on the fullscree
 static const float rootcolor[]      = {0.3, 0.3, 0.3, 1.0};
 static const float bordercolor[]    = {0.5, 0.5, 0.5, 1.0};
 static const float focuscolor[]     = {1.0, 0.0, 0.0, 1.0};
+static const int monocleborders      = 0;  /* draw borders when in monocle mode */
 
 /* tagging */
 static const char *tags[] = { "1", "2", "3" };
@@ -22,8 +23,8 @@ static const Rule rules[] = {
 static const Layout layouts[] = {
 	/* symbol     arrange function */
 	{ "f",        NULL },    /* no layout function means floating behavior */
-	{ "t",        tile },
 	{ "[M]",      monocle },
+	{ "t",        tile },
 };
 
 /* monitors */
@@ -46,12 +47,13 @@ static const struct xkb_rule_names xkb_rules = {
 	.options = "grp:caps_toggle",
 };
 
-static const int repeat_rate = 40;
-static const int repeat_delay = 400;
+static const int repeat_rate = 38;
+static const int repeat_delay = 350;
 
 /* Trackpad */
 static const int tap_to_click = 1;
 static const int natural_scrolling = 0;
+static const int accel_profile = 1;  /* 0: Adaptive | 1: Flat */
 
 /* If you want to use the windows key change this to WLR_MODIFIER_LOGO */
 #define MODKEY WLR_MODIFIER_LOGO
@@ -71,7 +73,7 @@ static const char *menucmd[] = { "rofi-launcher", NULL };
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
 	/* modifier                  key                 function        argument */
-	{ MODKEY,                    XKB_KEY_p,          spawn,          {.v = menucmd} },
+	{ MODKEY,                    XKB_KEY_d,          spawn,          {.v = menucmd} },
 	{ MODKEY,                    XKB_KEY_Return,     spawn,          {.v = termcmd} },
 	{ MODKEY,                    XKB_KEY_i,          focusstack,     {.i = +1} },
 	{ MODKEY,                    XKB_KEY_o,          focusstack,     {.i = -1} },
