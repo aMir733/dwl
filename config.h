@@ -2,9 +2,9 @@
 static const int sloppyfocus        = 0;  /* focus follows mouse */
 static const unsigned int borderpx  = 2;  /* border pixel of windows */
 static const int lockfullscreen     = 1;  /* 1 will force focus on the fullscreen window */
-static const float rootcolor[]      = {0.3, 0.3, 0.3, 1.0};
-static const float bordercolor[]    = {0.5, 0.5, 0.5, 1.0};
-static const float focuscolor[]     = {1.0, 0.0, 0.0, 1.0};
+static const float rootcolor[]      = {0.3, 0.3,  0.3,  1.0};
+static const float bordercolor[]    = {0.5, 0.5,  0.5,  1.0};
+static const float focuscolor[]     = {0.0, 0.33, 0.47, 1.0};
 static const int monocleborders      = 0;  /* draw borders when in monocle mode */
 
 /* tagging */
@@ -22,9 +22,9 @@ static const Rule rules[] = {
 /* layout(s) */
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "f",        NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
-	{ "t",        tile },
+	{ "[F]",        NULL },
+	{ "[T]",        tile },
 };
 
 /* monitors */

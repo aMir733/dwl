@@ -297,6 +297,7 @@ static struct wlr_scene_node *xytonode(double x, double y, struct wlr_surface **
 static void zoom(const Arg *arg);
 
 /* variables */
+int noborders = 0;
 static const char broken[] = "broken";
 static struct wl_display *dpy;
 static struct wlr_backend *backend;
@@ -485,7 +486,8 @@ arrange(Monitor *m)
 	Client *c;
 	wl_list_for_each(c, &clients, link)
 		wlr_scene_node_set_enabled(c->scene, VISIBLEON(c, c->mon));
-
+	noborders = (m->lt[m->sellt]->arrange == &monocle
+				&& !monocleborders) ? 1 : 0;
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
 	/* TODO recheck pointer focus here... or in resize()? */
@@ -1705,6 +1707,7 @@ resize(Client *c, int x, int y, int w, int h, int interact)
 	int min_width = 0, min_height = 0;
 	struct wlr_box *bbox = interact ? &sgeom : &c->mon->w;
 	client_min_size(c, &min_width, &min_height);
+	c->bw = (noborders || c->isfullscreen) ? 0 : borderpx;
 	c->geom.x = x;
 	c->geom.y = y;
 	c->geom.width = MAX(min_width + 2 * c->bw, w);
@@ -2550,13 +2553,10 @@ xwaylandready(struct wl_listener *listener, void *data)
 int
 main(int argc, char *argv[])
 {
-	char *startup_cmd = NULL;
 	int c;
 
-	while ((c = getopt(argc, argv, "s:hv")) != -1) {
-		if (c == 's')
-			startup_cmd = optarg;
-		else if (c == 'v')
+	while ((c = getopt(argc, argv, "hv")) != -1) {
+		if (c == 'v')
 			die("dwl " VERSION);
 		else
 			goto usage;
@@ -2568,9 +2568,10 @@ main(int argc, char *argv[])
 	if (!getenv("XDG_RUNTIME_DIR"))
 		die("XDG_RUNTIME_DIR must be set");
 	setup();
-	/* Run nwg-panel */
-	run("nwg-dwl-interface");
-    run(startup_cmd);
+	/* Run startup script */
+	system("~/startup-dwl.sh");
+	/* Start bar */
+	run("dtaobarv2.sh");
 	cleanup();
 	return EXIT_SUCCESS;
 
